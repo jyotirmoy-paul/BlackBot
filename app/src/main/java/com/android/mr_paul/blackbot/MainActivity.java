@@ -1,6 +1,7 @@
 package com.android.mr_paul.blackbot;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -10,7 +11,10 @@ import android.database.Cursor;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.ContactsContract;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -45,6 +49,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -73,9 +78,9 @@ public class MainActivity extends AppCompatActivity {
 
         AssetManager assetManager = getResources().getAssets();
         File cacheDirectory = new File(getCacheDir().toString() + "/mr_paul/bots/darkbot");
-        cacheDirectory.mkdirs();
+        boolean dirMakingSuccessful = cacheDirectory.mkdirs();
 
-        if(cacheDirectory.exists()){
+        if(dirMakingSuccessful && cacheDirectory.exists()){
             try{
                 for(String dir : assetManager.list("darkbot")){
                     File subDirectory = new File(cacheDirectory.getPath() + "/" + dir);
@@ -103,24 +108,7 @@ public class MainActivity extends AppCompatActivity {
             } catch(NullPointerException e){
                 Log.i("darkbot", "Nullpoint Exception!");
             }
-            Toast.makeText(this, "Initialization Completed!", Toast.LENGTH_SHORT).show();
         }
-
-        MagicStrings.root_path = getCacheDir().toString() + "/mr_paul";
-
-        // initialize the bot
-        AIMLProcessor.extension = new PCAIMLProcessorExtension();
-        bot = new Bot("darkbot", MagicStrings.root_path, "chat");
-        chat = new Chat(bot);
-
-
-        listView.setAdapter(chatDataAdapter);
-        messageSendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendChatMessage();
-            }
-        });
 
         // asking for permission for placing call
         if (ActivityCompat.checkSelfPermission(MainActivity.this,
@@ -130,6 +118,49 @@ public class MainActivity extends AppCompatActivity {
                 requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.CALL_PHONE}, 0x12345);
             }
         }
+        
+
+        final ProgressDialog pd = new ProgressDialog(MainActivity.this);
+        pd.setTitle("Please Wait");
+        pd.setMessage("Initializing Black Bot...");
+        pd.setCanceledOnTouchOutside(false);
+        pd.setCancelable(false);
+
+        // handler for communication with the background thread
+        final Handler handler = new Handler(){
+            @Override
+            public void dispatchMessage(Message msg) {
+                super.dispatchMessage(msg);
+                pd.cancel();
+            }
+        };
+
+        // initializing the bot in background thread
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // initialize the bot
+                MagicStrings.root_path = getCacheDir().toString() + "/mr_paul";
+                AIMLProcessor.extension = new PCAIMLProcessorExtension();
+                bot = new Bot("darkbot", MagicStrings.root_path, "chat");
+                chat = new Chat(bot);
+                handler.sendMessage(new Message()); // dispatch a message to the UI thread
+            }
+        });
+
+        // finally show the progress dialog box and start the thread
+        pd.show();
+        thread.start();
+
+
+
+        listView.setAdapter(chatDataAdapter);
+        messageSendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendChatMessage();
+            }
+        });
 
     }
 
@@ -225,9 +256,9 @@ public class MainActivity extends AppCompatActivity {
     private void makeCall(String name){
 
         String number = getNumber(name,MainActivity.this);
-        Intent callIntent = new Intent(Intent.ACTION_CALL);
-        callIntent.setData(Uri.parse("tel:" + number));
         try {
+            Intent callIntent = new Intent(Intent.ACTION_CALL);
+            callIntent.setData(Uri.parse("tel:" + number));
             startActivity(callIntent);
         }catch (SecurityException e){
             Toast.makeText(this,"Calling Permission - DENIED!",Toast.LENGTH_SHORT).show();
