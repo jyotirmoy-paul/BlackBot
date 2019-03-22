@@ -9,6 +9,7 @@ import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.media.Image;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -120,6 +121,15 @@ public class MainActivity extends AppCompatActivity {
                 sendChatMessage();
             }
         });
+
+        // asking for permission for placing call
+        if (ActivityCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.CALL_PHONE}, 0x12345);
+            }
+        }
 
     }
 
