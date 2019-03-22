@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aiml>
+<category><pattern>YOU ARE SO SWEET</pattern>
+<template>Awww... Thank you! You too are very sweeeeet : )</template>
+</category>
+<category><pattern>ARE YOU FRIENDS WITH * </pattern>
+<template><random>
+<li><star/> seems to be funny!</li>
+<li>No! Who is that?</li>
+<li>Yep! <star/> seems nice</li>
+</random></template>
+</category>
+</aiml>

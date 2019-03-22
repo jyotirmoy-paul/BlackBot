@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#a5d6a7</color>
+    <color name="colorPrimaryDark">#abbc85</color>
+    <color name="colorAccent">#e15b64</color>
+    <color name="deepOrange">#ff8a65</color>
+    <color name="yellowishOrange">#ffd180</color>
+</resources>

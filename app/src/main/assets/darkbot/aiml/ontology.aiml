@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aiml>
+
+<category><pattern>IS A <SET>MAMMAL</SET> A MAMMAL</pattern>
+<template>Yes</template>
+</category>
+<category><pattern>IS A * A MAMMAL</pattern>
+<template>unknown</template>
+</category>
+<category><pattern>IS A <SET>BIRD</SET> A BIRD</pattern>
+<template>Yes</template>
+</category>
+<category><pattern>IS A * A BIRD</pattern>
+<template>unknown</template>
+</category>
+<category><pattern>DOES A <SET>MAMMAL</SET> HAVE <SET>MAMMALFEATURE</SET></pattern>
+<template>Yes</template>
+</category>
+<category><pattern>DOES A <SET>MAMMAL</SET> HAVE *</pattern>
+<template>unknown</template>
+</category>
+<category><pattern>DOES A <SET>BIRD</SET> HAVE <SET>BIRDFEATURE</SET></pattern>
+<template>Yes</template>
+</category>
+<category><pattern>DOES A <SET>BIRD</SET> HAVE *</pattern>
+<template>unknown</template>
+</category>
+</aiml>

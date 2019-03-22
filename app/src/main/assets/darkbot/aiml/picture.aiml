@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aiml>
+<category><pattern>SHOW ME *</pattern>
+<template><srai>PICTUREBLAB <star/></srai><sraix hint="pic">SHOW ME <star/></sraix></template>
+</category>
+<category><pattern>PICTUREBLAB *</pattern>
+<template><random>
+<li>Here you are.</li>
+<li>I hope you like this picture.</li>
+<li>I have this picture.</li>
+<li>There you go.</li>
+<li>Look at that <star/>.</li>
+<li>This is what <star/> looks like.</li>
+<li>I found this pic of <star/>.</li>
+<li>I've displayed a picture for you.</li>
+</random></template>
+</category>
+</aiml>

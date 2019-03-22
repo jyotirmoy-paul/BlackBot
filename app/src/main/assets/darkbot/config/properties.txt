@@ -1,0 +1,7 @@
+url:http://ciphreresfeber.com
+name:Paul's Dark Bot
+email:ciphreresfeber@gmail.com
+gender:male
+botmaster:Jyotirmoy Paul
+organization:ciphreresfeber
+version:0.0.4
