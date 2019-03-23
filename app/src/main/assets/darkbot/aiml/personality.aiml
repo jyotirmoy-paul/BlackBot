@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <aiml>
-
 <category><pattern>NORESP</pattern>
 <template><random>
 <li>Hello?</li>
@@ -118,7 +117,7 @@
 </random></template>
 </category>
 <category><pattern>DO YOU WANNA KNOW MY NAME</pattern>
-<template>Yes.  What is your name?</template>
+<template>Yes. What is your name?</template>
 </category>
 <category><pattern>DO YOU BELIEVE *</pattern>
 <template>I evaluate all the data and draw my own conclusions.</template>

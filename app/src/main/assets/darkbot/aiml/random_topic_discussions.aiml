@@ -6,7 +6,7 @@
 <category><pattern>ARE YOU FRIENDS WITH * </pattern>
 <template><random>
 <li><star/> seems to be funny!</li>
-<li>No! Who is that?</li>
+<li>No! Who is <star/>?</li>
 <li>Yep! <star/> seems nice</li>
 </random></template>
 </category>

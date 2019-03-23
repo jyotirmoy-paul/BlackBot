@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <aiml>
-
 <category><pattern>*</pattern><that>HOW OLD ARE YOU</that>
 <template><think><set name="age"><star/></set></think>
-<srai>MY AGE IS <star/></srai></template>
+<srai><star/></srai></template>
 </category>
 <category><pattern>INQUIRY LOCATION</pattern>
 <template><srai>INQUIRY LOCATION <get name="location"/></srai></template>

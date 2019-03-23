@@ -170,7 +170,6 @@ The <map><name>number2ordinal</name><get var="nth"/></map> letter is <srai>FIRST
 <li><srai>REMOVE <star/> FROM LIST <get name="listname"/></srai></li>
 </condition></template>
 </category></topic>
-
 <category><pattern>SENTENCELENGTH</pattern>
 <template>0</template>
 </category>
