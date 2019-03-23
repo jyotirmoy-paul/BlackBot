@@ -2,7 +2,7 @@
 <aiml>
 <category><pattern>*</pattern><that>HOW OLD ARE YOU</that>
 <template><think><set name="age"><star/></set></think>
-<srai><star/></srai></template>
+<srai>MY AGE IS <star/></srai></template>
 </category>
 <category><pattern>INQUIRY LOCATION</pattern>
 <template><srai>INQUIRY LOCATION <get name="location"/></srai></template>

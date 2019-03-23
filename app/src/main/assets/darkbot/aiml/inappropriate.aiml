@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <aiml>
-
 <category><pattern>DO YOU WANT TO HAVE SEX</pattern>
 <template><srai>FILTER INAPPROPRIATE</srai></template>
 </category>

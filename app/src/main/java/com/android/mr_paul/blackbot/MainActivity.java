@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.android.mr_paul.blackbot.Adapters.ChatDataAdapter;
 import com.android.mr_paul.blackbot.DataTypes.MessageData;
 import com.android.mr_paul.blackbot.UtilityPackage.Constants;
+import com.bumptech.glide.Glide;
 
 import org.alicebot.ab.AIMLProcessor;
 import org.alicebot.ab.AIMLProcessorExtension;
@@ -58,11 +59,13 @@ public class MainActivity extends AppCompatActivity {
     private ListView listView;
     private EditText messageInputView;
     private ImageView messageSendButton;
-    ArrayList<MessageData> messageDataList;
-    private boolean speechAllowed = false; // the flag for toggling speech engine
+    private ImageView botWritingView;
+    private int timePerCharacter; // choose randomly between 50 and 100
 
+    ArrayList<MessageData> messageDataList;
     public Bot bot;
     public static Chat chat;
+    private boolean speechAllowed = true; // the flag for toggling speech engine
 
     private ChatDataAdapter chatDataAdapter;
     private TextToSpeech textToSpeech;
@@ -73,9 +76,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        timePerCharacter = 40 + (new Random().nextInt(50)); // 40 - 90
+
         listView = findViewById(R.id.list_view);
         messageInputView = findViewById(R.id.message_input_view);
         messageSendButton = findViewById(R.id.message_send_button);
+        botWritingView = findViewById(R.id.bot_writing_view);
 
         messageDataList = new ArrayList<>();
         chatDataAdapter = new ChatDataAdapter(this, R.layout.activity_main, messageDataList);
@@ -84,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         File cacheDirectory = new File(getCacheDir().toString() + "/mr_paul/bots/darkbot");
         boolean dirMakingSuccessful = cacheDirectory.mkdirs();
 
+        // saving the bot's core data in the cache
         if(dirMakingSuccessful && cacheDirectory.exists()){
             try{
                 for(String dir : assetManager.list("darkbot")){
@@ -143,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                // initialize the bot
                 MagicStrings.root_path = getCacheDir().toString() + "/mr_paul";
                 AIMLProcessor.extension = new PCAIMLProcessorExtension();
                 bot = new Bot("darkbot", MagicStrings.root_path, "chat");
@@ -183,7 +189,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
     }
 
 
@@ -205,12 +210,12 @@ public class MainActivity extends AppCompatActivity {
         if(message.toUpperCase().startsWith("CALL")){
             // calling a phone number as requested by user
             String[] temp = message.split(" ", 2);
-            displayBotReply(new MessageData(Constants.BOT, "Placing a call on " + temp[1] ,timeStamp));
+            displayBotReply(new MessageData(Constants.BOT, "Calling " + temp[1] + "...",timeStamp));
             makeCall(temp[1]);
-        } else if(message.toUpperCase().startsWith("OPEN")){
+        } else if(message.toUpperCase().startsWith("OPEN") || message.toUpperCase().startsWith("LAUNCH")){
             // call intent to app, requested by user
             String[] temp = message.split(" ", 2);
-            displayBotReply(new MessageData(Constants.BOT, "Sure! Trying to open " + temp[1] + "...",timeStamp));
+            displayBotReply(new MessageData(Constants.BOT, "Sure thing! Opening " + temp[1] + "...",timeStamp));
             launchApp(getAppName(temp[1]));
         } else{
             // chat with bot - save the reply from the bot
@@ -222,17 +227,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // displayBotReply() method
-    private void displayBotReply(MessageData messageData){
-        messageDataList.add(messageData);
-        chatDataAdapter.notifyDataSetChanged();
+    private void displayBotReply(final MessageData messageData){
 
-        // speak out the bot reply
-        if(speechAllowed){
-            textToSpeech.setSpeechRate(0.9f);
-            textToSpeech.setPitch(1f);
+        // TODO: add the raw gif file
+        botWritingView.setVisibility(View.VISIBLE);
+        Glide.with(MainActivity.this).asGif().load(R.drawable.bot_animation).into(botWritingView);
 
-            textToSpeech.speak(messageData.getMessage(), TextToSpeech.QUEUE_FLUSH, null);
-        }
+        final String message = messageData.getMessage();
+        int lengthOfMessage = message.length();
+
+        int timeToWriteInMillis = lengthOfMessage*timePerCharacter; // each character taking 10ms to write
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                botWritingView.setVisibility(View.GONE);
+
+                messageDataList.add(messageData);
+                chatDataAdapter.notifyDataSetChanged();
+
+                // speak out the bot reply
+                if(speechAllowed){
+                    textToSpeech.setSpeechRate(0.9f);
+                    textToSpeech.setPitch(1f);
+
+                    textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null);
+                }
+
+            }
+        }, timeToWriteInMillis); // the delay is according to the length of message
+
     }
 
     // UTILITY METHODS
@@ -287,7 +313,15 @@ public class MainActivity extends AppCompatActivity {
     // method for placing a call
     private void makeCall(String name){
 
-        String number = getNumber(name,MainActivity.this);
+        String number;
+
+        if(name.matches("[0-9]+") && name.length() > 2){
+            // string only contains number
+            number = name;
+        } else{
+            number = getNumber(name,MainActivity.this);
+        }
+
         try {
             Intent callIntent = new Intent(Intent.ACTION_CALL);
             callIntent.setData(Uri.parse("tel:" + number));

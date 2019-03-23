@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <aiml>
-
 <category><pattern>ASK FAMILIAR CONTACTNAME</pattern>
 <template><think><set name="topic">ASKING FAMILIAR CONTACTNAME</set></think>
 What is your <lowercase><get name="familiarpredicate"/></lowercase>'s name?</template>
@@ -21,7 +20,6 @@ What is your <lowercase><get name="familiarpredicate"/></lowercase>'s name?</tem
 <li><srai>CONTACTFINALIZE</srai> <srai><star/></srai></li>
 </condition></template>
 </category></topic>
-
 <category><pattern>MY <SET>FAMILIARNAME</SET> S NAME IS *</pattern>
 <template><think>
 <set name="familiarpredicate"><srai>FAMILIARPREDICATE <star/></srai></set>

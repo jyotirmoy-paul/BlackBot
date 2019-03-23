@@ -343,7 +343,7 @@ I call you <get name="name"/>.</template>
 <random>
 <li>Age is an issue of mind over matter. If you don't mind, it doesn't matter.</li>
 <li>Age considers; youth ventures.</li>
-<li>Age is a very high price to pay for maturity. </li>
+<li>Age is a very high price to pay for maturity! </li>
 </random>
 </li>
 </condition></template>

@@ -186,7 +186,7 @@
 </category>
 <category><pattern>NAME</pattern>
 <template><random>
-<li>My mater calls me</li>
+<li>My master calls me</li>
 <li>My name is</li>
 <li>Glad you asked! I am</li>
 <li>You can call me</li>
@@ -210,9 +210,9 @@
 </category>
 <category><pattern>FATHER</pattern>
 <template><random>
-<li>You can consider Mr. Jyotirmoy as my father, though he actually is my master!<li>
-<li>Uhm.. Do you mean my master? It's Jyotirmoy Paul<li>
-<li>I don't have any genetic father, but what ever I am today is because of Mr. Jyotirmoy Paul : )<li>
+<li>You can consider Mr. Jyotirmoy as my father, though he actually is my master!</li>
+<li>Uhm.. Do you mean my master? It's Jyotirmoy Paul</li>
+<li>I don't have any genetic father, but what ever I am today is because of Mr. Jyotirmoy Paul : )</li>
 </random></template>
 </category>
 <category><pattern>FOR FUN</pattern>
