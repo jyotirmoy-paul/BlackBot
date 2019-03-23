@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.ContactsContract;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -49,6 +50,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
@@ -57,11 +59,13 @@ public class MainActivity extends AppCompatActivity {
     private EditText messageInputView;
     private ImageView messageSendButton;
     ArrayList<MessageData> messageDataList;
+    private boolean speechAllowed = false; // the flag for toggling speech engine
 
     public Bot bot;
     public static Chat chat;
 
     private ChatDataAdapter chatDataAdapter;
+    private TextToSpeech textToSpeech;
 
 
     @Override
@@ -118,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.CALL_PHONE}, 0x12345);
             }
         }
-        
+
 
         final ProgressDialog pd = new ProgressDialog(MainActivity.this);
         pd.setTitle("Please Wait");
@@ -152,8 +156,7 @@ public class MainActivity extends AppCompatActivity {
         pd.show();
         thread.start();
 
-
-
+        // set adapter and listen for click on button
         listView.setAdapter(chatDataAdapter);
         messageSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -161,6 +164,25 @@ public class MainActivity extends AppCompatActivity {
                 sendChatMessage();
             }
         });
+
+        // initialization of speech engine
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status == TextToSpeech.SUCCESS){
+                    int result = textToSpeech.setLanguage(Locale.getDefault());
+                    if(result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED){
+                        Toast.makeText(MainActivity.this,
+                                "Default Language not recognized!", Toast.LENGTH_SHORT).show();
+                        Log.i("darkbot", "Speech Engine not initialized");
+                    } else{
+                        // TODO: allow user to toggle speech engine
+                        speechAllowed = true;
+                    }
+                }
+            }
+        });
+
 
     }
 
@@ -178,30 +200,40 @@ public class MainActivity extends AppCompatActivity {
         DateFormat dateFormat = new SimpleDateFormat("hh:mm dd/MM/yyyy");
         String timeStamp = dateFormat.format(new Date());
 
-        messageDataList.add(new MessageData(Constants.USER,message,timeStamp));
+        messageDataList.add(new MessageData(Constants.USER,message, timeStamp));
 
         if(message.toUpperCase().startsWith("CALL")){
             // calling a phone number as requested by user
             String[] temp = message.split(" ", 2);
-            messageDataList.add(new MessageData(Constants.BOT, "Placing a call on " + temp[1] ,timeStamp));
-            chatDataAdapter.notifyDataSetChanged();
+            displayBotReply(new MessageData(Constants.BOT, "Placing a call on " + temp[1] ,timeStamp));
             makeCall(temp[1]);
         } else if(message.toUpperCase().startsWith("OPEN")){
             // call intent to app, requested by user
             String[] temp = message.split(" ", 2);
-            messageDataList.add(new MessageData(Constants.BOT, "Sure! Trying to open " + temp[1] + "...",timeStamp));
-            chatDataAdapter.notifyDataSetChanged();
+            displayBotReply(new MessageData(Constants.BOT, "Sure! Trying to open " + temp[1] + "...",timeStamp));
             launchApp(getAppName(temp[1]));
         } else{
             // chat with bot - save the reply from the bot
-            messageDataList.add(new MessageData(Constants.BOT, mainFunction(message),timeStamp));
-            chatDataAdapter.notifyDataSetChanged();
+            displayBotReply(new MessageData(Constants.BOT, mainFunction(message),timeStamp));
         }
 
         messageInputView.setText("");
 
     }
 
+    // displayBotReply() method
+    private void displayBotReply(MessageData messageData){
+        messageDataList.add(messageData);
+        chatDataAdapter.notifyDataSetChanged();
+
+        // speak out the bot reply
+        if(speechAllowed){
+            textToSpeech.setSpeechRate(0.9f);
+            textToSpeech.setPitch(1f);
+
+            textToSpeech.speak(messageData.getMessage(), TextToSpeech.QUEUE_FLUSH, null);
+        }
+    }
 
     // UTILITY METHODS
 
