@@ -1,15 +1,19 @@
 package com.android.mr_paul.blackbot;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
@@ -64,18 +68,15 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    //private ListView listView;
-    private RecyclerView recyclerView;
     private EditText messageInputView;
-    private ImageView messageSendButton;
     private ImageView botWritingView;
-    private ImageView deleteChatMessages;
     private int timePerCharacter;
+    private ImageView botSpeechToggle;
 
     //ArrayList<MessageData> messageDataList;
     public Bot bot;
     public static Chat chat;
-    private boolean speechAllowed = true; // the flag for toggling speech engine
+    private boolean speechAllowed; // the flag for toggling speech engine
 
     //private ChatDataAdapter chatDataAdapter;
     private TextToSpeech textToSpeech;
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private SQLiteDatabase database;
     private MessageAdapter messageAdapter;
 
+    SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,20 +98,21 @@ public class MainActivity extends AppCompatActivity {
 
         //listView = findViewById(R.id.list_view);
         messageInputView = findViewById(R.id.message_input_view);
-        messageSendButton = findViewById(R.id.message_send_button);
+        ImageView messageSendButton = findViewById(R.id.message_send_button);
         botWritingView = findViewById(R.id.bot_writing_view);
-        deleteChatMessages = findViewById(R.id.delete_chats);
+        final ImageView deleteChatMessages = findViewById(R.id.delete_chats);
+        botSpeechToggle = findViewById(R.id.bot_speech_toggle);
 
         //messageDataList = new ArrayList<>();
         //chatDataAdapter = new ChatDataAdapter(this, R.layout.activity_main, messageDataList);
 
-        recyclerView = findViewById(R.id.recycler_view);
+        //private ListView listView;
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setReverseLayout(true);
         recyclerView.setLayoutManager(linearLayoutManager);
         messageAdapter = new MessageAdapter(this, getAllMessages());
         recyclerView.setAdapter(messageAdapter);
-
 
         AssetManager assetManager = getResources().getAssets();
         File cacheDirectory = new File(getCacheDir().toString() + "/mr_paul/bots/darkbot");
@@ -206,8 +209,19 @@ public class MainActivity extends AppCompatActivity {
                                 "Default Language not recognized!", Toast.LENGTH_SHORT).show();
                         Log.i("darkbot", "Speech Engine not initialized");
                     } else{
-                        // TODO: allow user to toggle speech engine
-                        speechAllowed = true;
+                        preferences = getSharedPreferences(Constants.SHARED_PREFERENCES, MODE_PRIVATE);
+                        Boolean wasSpeechAllowed = preferences.getBoolean(Constants.WAS_SPEECH_ALLOWED, true);
+                        speechAllowed = wasSpeechAllowed;
+
+                        if(wasSpeechAllowed){
+                            // show the mute button
+                            botSpeechToggle.setImageResource(R.drawable.ic_mute_button);
+
+                        } else{
+                            // show the volume up button
+                            botSpeechToggle.setImageResource(R.drawable.ic_volume_up_button);
+                        }
+
                     }
                 }
             }
@@ -216,12 +230,59 @@ public class MainActivity extends AppCompatActivity {
         deleteChatMessages.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                database.execSQL("DELETE FROM " + MessageContract.MessageEntry.TABLE_NAME);
-                messageAdapter.swapCursor(getAllMessages());
+                deleteAllChatData();
+            }
+        });
+
+        botSpeechToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(speechAllowed){
+                    speechAllowed = false;
+                    // show the volume up button - currently the bot is mute
+                    botSpeechToggle.setImageResource(R.drawable.ic_volume_up_button);
+                } else{
+                    speechAllowed = true;
+                    // show the mute button - currently the bot is speaking
+                    botSpeechToggle.setImageResource(R.drawable.ic_mute_button);
+                }
+
+                // finally write the settings to the shared preference
+                preferences.edit().putBoolean(Constants.WAS_SPEECH_ALLOWED, speechAllowed).apply();
+
             }
         });
 
     }
+
+    // method to delete all the chat data
+    private void deleteAllChatData(){
+        // ask for user confirmation
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setMessage("Are you sure, You want to delete all the chats?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                database.execSQL("DELETE FROM " + MessageContract.MessageEntry.TABLE_NAME);
+                messageAdapter.swapCursor(getAllMessages());
+
+                Toast.makeText(MainActivity.this,
+                        "All chats deleted!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Nopes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // do nothing
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
 
     private Cursor getAllMessages(){
         return database.query(
@@ -238,7 +299,6 @@ public class MainActivity extends AppCompatActivity {
 
     // message sending method
     public void sendChatMessage(){
-
         String message = messageInputView.getText().toString().trim();
         if(message.isEmpty()){
             messageInputView.setError("Can't send empty message!");
@@ -249,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
         DateFormat dateFormat = new SimpleDateFormat("hh:mm dd/MM/yyyy");
         String timeStamp = dateFormat.format(new Date());
 
-        addMessage(new MessageData(Constants.USER,message, timeStamp));
+        addMessage(new MessageData(Constants.USER, message, timeStamp));
 
         if(message.toUpperCase().startsWith("CALL")){
             // calling a phone number as requested by user
@@ -261,6 +321,8 @@ public class MainActivity extends AppCompatActivity {
             String[] temp = message.split(" ", 2);
             displayBotReply(new MessageData(Constants.BOT, "Sure thing! Opening " + temp[1] + "...",timeStamp));
             launchApp(getAppName(temp[1]));
+        } else if(message.toUpperCase().startsWith("DELETE") || message.toUpperCase().startsWith("CLEAR")){
+            displayBotReply(new MessageData(Constants.BOT,"Okay! I will clear up everything for you!", timeStamp));
         } else{
             // chat with bot - save the reply from the bot
             String botReply = mainFunction(message);
@@ -293,6 +355,11 @@ public class MainActivity extends AppCompatActivity {
                 botWritingView.setVisibility(View.GONE);
 
                 addMessage(messageData);
+
+                if(messageData.getMessage().equals("Okay! I will clear up everything for you!")){
+                    // the user requested to delete all chat data
+                    deleteAllChatData();
+                }
 
                 // speak out the bot reply
                 if(speechAllowed){
