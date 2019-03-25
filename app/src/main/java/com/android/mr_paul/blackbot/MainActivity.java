@@ -2,12 +2,14 @@ package com.android.mr_paul.blackbot;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
@@ -19,8 +21,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -28,6 +33,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.android.mr_paul.blackbot.Adapters.ChatDataAdapter;
+import com.android.mr_paul.blackbot.Adapters.MessageAdapter;
+import com.android.mr_paul.blackbot.Contract.MessageContract;
+import com.android.mr_paul.blackbot.DBHelper.MessageDBHelper;
 import com.android.mr_paul.blackbot.DataTypes.MessageData;
 import com.android.mr_paul.blackbot.UtilityPackage.Constants;
 import com.bumptech.glide.Glide;
@@ -56,19 +64,24 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ListView listView;
+    //private ListView listView;
+    private RecyclerView recyclerView;
     private EditText messageInputView;
     private ImageView messageSendButton;
     private ImageView botWritingView;
-    private int timePerCharacter; // choose randomly between 50 and 100
+    private ImageView deleteChatMessages;
+    private int timePerCharacter;
 
-    ArrayList<MessageData> messageDataList;
+    //ArrayList<MessageData> messageDataList;
     public Bot bot;
     public static Chat chat;
     private boolean speechAllowed = true; // the flag for toggling speech engine
 
-    private ChatDataAdapter chatDataAdapter;
+    //private ChatDataAdapter chatDataAdapter;
     private TextToSpeech textToSpeech;
+
+    private SQLiteDatabase database;
+    private MessageAdapter messageAdapter;
 
 
     @Override
@@ -76,15 +89,27 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        timePerCharacter = 40 + (new Random().nextInt(50)); // 40 - 90
+        MessageDBHelper messageDBHelper = new MessageDBHelper(this);
+        database = messageDBHelper.getWritableDatabase();
 
-        listView = findViewById(R.id.list_view);
+        timePerCharacter = 30 + (new Random().nextInt(30)); // 30 - 60
+
+        //listView = findViewById(R.id.list_view);
         messageInputView = findViewById(R.id.message_input_view);
         messageSendButton = findViewById(R.id.message_send_button);
         botWritingView = findViewById(R.id.bot_writing_view);
+        deleteChatMessages = findViewById(R.id.delete_chats);
 
-        messageDataList = new ArrayList<>();
-        chatDataAdapter = new ChatDataAdapter(this, R.layout.activity_main, messageDataList);
+        //messageDataList = new ArrayList<>();
+        //chatDataAdapter = new ChatDataAdapter(this, R.layout.activity_main, messageDataList);
+
+        recyclerView = findViewById(R.id.recycler_view);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setReverseLayout(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        messageAdapter = new MessageAdapter(this, getAllMessages());
+        recyclerView.setAdapter(messageAdapter);
+
 
         AssetManager assetManager = getResources().getAssets();
         File cacheDirectory = new File(getCacheDir().toString() + "/mr_paul/bots/darkbot");
@@ -162,8 +187,7 @@ public class MainActivity extends AppCompatActivity {
         pd.show();
         thread.start();
 
-        // set adapter and listen for click on button
-        listView.setAdapter(chatDataAdapter);
+        // listen for button click
         messageSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -189,6 +213,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        deleteChatMessages.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                database.execSQL("DELETE FROM " + MessageContract.MessageEntry.TABLE_NAME);
+                messageAdapter.swapCursor(getAllMessages());
+            }
+        });
+
+    }
+
+    private Cursor getAllMessages(){
+        return database.query(
+                MessageContract.MessageEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                MessageContract.MessageEntry.COLUMN_SQL_TIMESTAMP + " DESC"
+        );
     }
 
 
@@ -205,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
         DateFormat dateFormat = new SimpleDateFormat("hh:mm dd/MM/yyyy");
         String timeStamp = dateFormat.format(new Date());
 
-        messageDataList.add(new MessageData(Constants.USER,message, timeStamp));
+        addMessage(new MessageData(Constants.USER,message, timeStamp));
 
         if(message.toUpperCase().startsWith("CALL")){
             // calling a phone number as requested by user
@@ -219,7 +263,11 @@ public class MainActivity extends AppCompatActivity {
             launchApp(getAppName(temp[1]));
         } else{
             // chat with bot - save the reply from the bot
-            displayBotReply(new MessageData(Constants.BOT, mainFunction(message),timeStamp));
+            String botReply = mainFunction(message);
+            if(botReply.trim().isEmpty()){
+                botReply = mainFunction("UDC");
+            }
+            displayBotReply(new MessageData(Constants.BOT, botReply,timeStamp));
         }
 
         messageInputView.setText("");
@@ -229,7 +277,6 @@ public class MainActivity extends AppCompatActivity {
     // displayBotReply() method
     private void displayBotReply(final MessageData messageData){
 
-        // TODO: add the raw gif file
         botWritingView.setVisibility(View.VISIBLE);
         Glide.with(MainActivity.this).asGif().load(R.drawable.bot_animation).into(botWritingView);
 
@@ -245,8 +292,7 @@ public class MainActivity extends AppCompatActivity {
 
                 botWritingView.setVisibility(View.GONE);
 
-                messageDataList.add(messageData);
-                chatDataAdapter.notifyDataSetChanged();
+                addMessage(messageData);
 
                 // speak out the bot reply
                 if(speechAllowed){
@@ -259,6 +305,20 @@ public class MainActivity extends AppCompatActivity {
             }
         }, timeToWriteInMillis); // the delay is according to the length of message
 
+    }
+
+    private void addMessage(MessageData messageData){
+        String sender = messageData.getSender();
+        String message = messageData.getMessage();
+        String timestamp = messageData.getTimeStamp();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MessageContract.MessageEntry.COLUMN_SENDER, sender);
+        contentValues.put(MessageContract.MessageEntry.COLUMN_MESSAGE, message);
+        contentValues.put(MessageContract.MessageEntry.COLUMN_TIMESTAMP, timestamp);
+
+        database.insert(MessageContract.MessageEntry.TABLE_NAME, null, contentValues);
+        messageAdapter.swapCursor(getAllMessages());
     }
 
     // UTILITY METHODS
@@ -352,14 +412,13 @@ public class MainActivity extends AppCompatActivity {
     protected void launchApp(String packageName) {
         Intent mIntent = getPackageManager().getLaunchIntentForPackage(packageName);
 
-        if(packageName.equals("package.not.found")) {
-            Toast.makeText(getApplicationContext(),"I'm afraid, there's no such app!", Toast.LENGTH_SHORT).show();
-        }
-        else if (mIntent != null) {
+        if (packageName.equals("package.not.found")) {
+            Toast.makeText(getApplicationContext(), "I'm afraid, there's no such app!", Toast.LENGTH_SHORT).show();
+        } else if (mIntent != null) {
             try {
                 startActivity(mIntent);
             } catch (Exception err) {
-                Log.i("darkbot","App launch failed!");
+                Log.i("darkbot", "App launch failed!");
                 Toast.makeText(this, "I'm afraid, there's no such app!", Toast.LENGTH_SHORT).show();
             }
         }

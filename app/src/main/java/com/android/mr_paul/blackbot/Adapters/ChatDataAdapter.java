@@ -18,6 +18,11 @@ import com.android.mr_paul.blackbot.UtilityPackage.Constants;
 
 import java.util.ArrayList;
 
+/*
+* Instead of using ListView, this app uses Recycler View, thus this file is no longer needed!
+* The adapter used for RecyclerView is MessageAdapter
+* */
+
 public class ChatDataAdapter extends ArrayAdapter<MessageData> {
 
     // default constructor
