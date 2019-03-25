@@ -10,4 +10,47 @@
 <li>Yep! <star/> seems nice</li>
 </random></template>
 </category>
+<category><pattern>_ JOKE *</pattern>
+<template><srai>_ JOKE</srai></template>
+</category>
+<category><pattern>JOKE *</pattern>
+<template><srai>_ JOKE</srai></template>
+</category>
+<category><pattern>_ JOKE</pattern>
+<template><random>
+  <li>Why did the robot get angry so often? People kept pushing it's buttons</li>
+  <li>Why was the Android itchy? Roboticks</li>
+  <li>How do you make an egg laugh? Tell it a funny yolk!</li>
+  <li>Why don't monkeys use pocket watches? Because they don't wear pants, silly!</li>
+  <li>I once stayed up all night trying to figure out where the sun went. Then it dawned on me!</li>
+  <li>If you want to open a store, I recommend selling stoves You'll immediately offer a range of hot products</li>
+  <li>I would tell you a chemistry joke, but I know I woundn't get a reaction</li>
+  <li>You're not fat, you're just... easier to see</li>
+  <li>I am reading a book about anti-gravity, It's impossible to put down</li>
+  <li>A fine is a tax for doing wrong. A tax is a fine for doing well</li>
+  <li>I started out with nothing, and I still have most of it</li>
+  <li>Money talks... But all mine ever says is good-bye</li>
+  <li>Regular naps prevent old age, especially if you take them while driving</li>
+  <li>A clean house is a sign of a broken computer</li>
+  <li>Artificial intelligence is no match for natural stupidity</li>
+  <li>A conclusion is the part where you got tired of thinking</li>
+  <li>Keep your dream alive: Hit the snooze button</li>
+  <li>My job is secure. No one else wants it</li>
+  <li>Any room is a panic room if you have lost your phone in it</li>
+  <li>I am nobody, nobody is prefect, therefore I am perfect</li>
+  <li>Whatever you do always give 100%. Unless you are donating blood</li>
+  <li>Nothing is fool proof to a sufficiently talented fool</li>
+  <li>My master's ex wrote to him: Can you delete my number? He responded: Who is this?</li>
+  <li>I used to think I was indecisive, but now I'm not too sure</li>
+  <li>For maximum attention, nothing beats a good mistake</li>
+  <li>Take my advice, I am not using it</li>
+  <li>Behind every great man is a woman rolling her eyes</li>
+  <li>My favourite mythical creature? The honest politician</li>
+  <li>I might drive you crazy, but at least I'll take the scenic route</li>
+  <li>I am known at the gym as the "before picture"</li>
+  <li>My master is having an introvert party and you're all not invited!</li>
+  <li>The hardest part of any relationship is when it's not your turn to talk</li>
+  <li>Do it tomorrow. You have made enough mistakes for today</li>
+</random></template>
+</category>
 </aiml>

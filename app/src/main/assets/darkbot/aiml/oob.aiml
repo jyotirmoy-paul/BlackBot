@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <aiml>
 <category><pattern>TEACH ME <SET>LANGUAGE</SET></pattern>
-<template><srai>LANGUAGE</srai> Let's try a searching for "learn <star/>". <oob><search>LEARN <star/></search></oob></template>
+<template><srai>LANGUAGE</srai> To learn <star/>, use a broswer to search, try "OPEN Chrome"</template>
 </category>
 <category><pattern>CLEAR LOG</pattern>
 <template>Clearing... Done!</template>

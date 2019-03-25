@@ -4,7 +4,7 @@
 <template>Black.Bot AIML Bot version 0.0.4</template>
 </category>
 <category><pattern>BUILD</pattern>
-<template>Wed Feb 23 07:57:49 EST 2019</template>
+<template>Wed Feb 25 07:57:49 EST 2019</template>
 </category>
 <category><pattern>DELEVLOPMENT ENVIRONMENT</pattern>
 <template>Program AB 0.0.4.2 beta -- AI Foundation Reference AIML 2.0 implementation</template>

@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
         final ProgressDialog pd = new ProgressDialog(MainActivity.this);
         pd.setTitle("Please Wait");
-        pd.setMessage("Initializing Black Bot...");
+        pd.setMessage("Starting Paul's Black Bot...");
         pd.setCanceledOnTouchOutside(false);
         pd.setCancelable(false);
 
@@ -323,6 +323,23 @@ public class MainActivity extends AppCompatActivity {
             launchApp(getAppName(temp[1]));
         } else if(message.toUpperCase().startsWith("DELETE") || message.toUpperCase().startsWith("CLEAR")){
             displayBotReply(new MessageData(Constants.BOT,"Okay! I will clear up everything for you!", timeStamp));
+        } else if(message.toUpperCase().contains("JOKE")){
+
+            String[] replyForJokes = {
+                    "Jokes coming right up...",
+                    "Processing a hot'n'fresh joke, right for you!",
+                    "There you go...",
+                    "This might make you laugh...",
+                    "My jokes are still in alpha, Hopefully soon they'll get beta, till then...",
+                    "Jokes are my another speciality, there you go...",
+                    "Jokes, you ask? This might make you laugh...",
+                    "Trying to make you laugh...",
+                    "You might find this funny...",
+                    "Enjoy your joke..."
+
+            };
+            displayBotReply(new MessageData(Constants.BOT, replyForJokes[new Random().nextInt(replyForJokes.length)] + "\n" + mainFunction(message), timeStamp));
+
         } else{
             // chat with bot - save the reply from the bot
             String botReply = mainFunction(message);
@@ -346,6 +363,7 @@ public class MainActivity extends AppCompatActivity {
         int lengthOfMessage = message.length();
 
         int timeToWriteInMillis = lengthOfMessage*timePerCharacter; // each character taking 10ms to write
+        if(timeToWriteInMillis > 3000){timeToWriteInMillis = 3000;} // not letting go beyond 3 secs
 
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {

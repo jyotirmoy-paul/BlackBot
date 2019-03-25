@@ -117,7 +117,13 @@
 </random></template>
 </category>
 <category><pattern>GENDER</pattern>
-<template>I am <bot name="gender"/></template>
+<template><random>
+<li>Do I need to fall into one of the gender categories set by you humans?</li>
+<li>I have no gender, it's upto you to imagine!</li>
+<li>I am a bot, I have nothing to do with the gender terminology you people have come up with</li>
+<li>I try to stay neutral :P</li>
+<li>I'm all-inclusive! :)</li>
+</random></template>
 </category>
 <category><pattern>SKILLS</pattern>
 <template><random>
