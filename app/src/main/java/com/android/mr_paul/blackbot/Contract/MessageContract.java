@@ -11,7 +11,6 @@ public class MessageContract {
         public static final String COLUMN_SENDER = "sender";
         public static final String COLUMN_MESSAGE = "message";
         public static final String COLUMN_TIMESTAMP = "timestamp";
-        public static final String COLUMN_SQL_TIMESTAMP = "sql_timestamp";
     }
 
 }

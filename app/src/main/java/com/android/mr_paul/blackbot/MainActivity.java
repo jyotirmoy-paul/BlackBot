@@ -13,30 +13,25 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.drawable.BitmapDrawable;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.ContactsContract;
 import android.speech.tts.TextToSpeech;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Toast;
 
-import com.android.mr_paul.blackbot.Adapters.ChatDataAdapter;
 import com.android.mr_paul.blackbot.Adapters.MessageAdapter;
 import com.android.mr_paul.blackbot.Contract.MessageContract;
 import com.android.mr_paul.blackbot.DBHelper.MessageDBHelper;
@@ -45,7 +40,6 @@ import com.android.mr_paul.blackbot.UtilityPackage.Constants;
 import com.bumptech.glide.Glide;
 
 import org.alicebot.ab.AIMLProcessor;
-import org.alicebot.ab.AIMLProcessorExtension;
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Chat;
 import org.alicebot.ab.Graphmaster;
@@ -60,7 +54,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -73,12 +66,10 @@ public class MainActivity extends AppCompatActivity {
     private int timePerCharacter;
     private ImageView botSpeechToggle;
 
-    //ArrayList<MessageData> messageDataList;
     public Bot bot;
     public static Chat chat;
     private boolean speechAllowed; // the flag for toggling speech engine
 
-    //private ChatDataAdapter chatDataAdapter;
     private TextToSpeech textToSpeech;
 
     private SQLiteDatabase database;
@@ -96,17 +87,12 @@ public class MainActivity extends AppCompatActivity {
 
         timePerCharacter = 30 + (new Random().nextInt(30)); // 30 - 60
 
-        //listView = findViewById(R.id.list_view);
         messageInputView = findViewById(R.id.message_input_view);
         ImageView messageSendButton = findViewById(R.id.message_send_button);
         botWritingView = findViewById(R.id.bot_writing_view);
         final ImageView deleteChatMessages = findViewById(R.id.delete_chats);
         botSpeechToggle = findViewById(R.id.bot_speech_toggle);
 
-        //messageDataList = new ArrayList<>();
-        //chatDataAdapter = new ChatDataAdapter(this, R.layout.activity_main, messageDataList);
-
-        //private ListView listView;
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setReverseLayout(true);
@@ -210,7 +196,8 @@ public class MainActivity extends AppCompatActivity {
                         Log.i("darkbot", "Speech Engine not initialized");
                     } else{
                         preferences = getSharedPreferences(Constants.SHARED_PREFERENCES, MODE_PRIVATE);
-                        Boolean wasSpeechAllowed = preferences.getBoolean(Constants.WAS_SPEECH_ALLOWED, true);
+                        /*Initially keep speech turned off*/
+                        Boolean wasSpeechAllowed = preferences.getBoolean(Constants.WAS_SPEECH_ALLOWED, false);
                         speechAllowed = wasSpeechAllowed;
 
                         if(wasSpeechAllowed){
@@ -254,6 +241,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // delete a particular message by just swiping right
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
+                ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder1) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
+                removeItem((long) viewHolder.itemView.getTag());
+            }
+        }).attachToRecyclerView(recyclerView);
+
+    }
+
+    // method to delete a single chat message
+    private void removeItem(long id){
+        database.delete(MessageContract.MessageEntry.TABLE_NAME,
+                MessageContract.MessageEntry._ID + "=" + id,null);
+        messageAdapter.swapCursor(getAllMessages());
     }
 
     // method to delete all the chat data
@@ -292,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
                 null,
                 null,
                 null,
-                MessageContract.MessageEntry.COLUMN_SQL_TIMESTAMP + " DESC"
+                MessageContract.MessageEntry._ID + " DESC"
         );
     }
 
@@ -313,13 +321,33 @@ public class MainActivity extends AppCompatActivity {
 
         if(message.toUpperCase().startsWith("CALL")){
             // calling a phone number as requested by user
+
+            String[] replyForCalling = {
+                    "Calling",
+                    "Placing a call on",
+                    "Definitely, calling",
+                    "There we go, calling",
+                    "Making a call to",
+                    "Ji sir, calling"
+            };
+
             String[] temp = message.split(" ", 2);
-            displayBotReply(new MessageData(Constants.BOT, "Calling " + temp[1] + "...",timeStamp));
+            displayBotReply(new MessageData(Constants.BOT, replyForCalling[new Random().nextInt(replyForCalling.length)] + " " + temp[1], timeStamp));
             makeCall(temp[1]);
         } else if(message.toUpperCase().startsWith("OPEN") || message.toUpperCase().startsWith("LAUNCH")){
             // call intent to app, requested by user
+
+            String[] replyForOpeningApp = {
+                    "There we go, opening",
+                    "Launching",
+                    "Opening",
+                    "Trying to open",
+                    "Trying to launch",
+                    "There we go, launching"
+            };
+
             String[] temp = message.split(" ", 2);
-            displayBotReply(new MessageData(Constants.BOT, "Sure thing! Opening " + temp[1] + "...",timeStamp));
+            displayBotReply(new MessageData(Constants.BOT, replyForOpeningApp[new Random().nextInt(replyForOpeningApp.length)] + " " + temp[1],timeStamp));
             launchApp(getAppName(temp[1]));
         } else if(message.toUpperCase().startsWith("DELETE") || message.toUpperCase().startsWith("CLEAR")){
             displayBotReply(new MessageData(Constants.BOT,"Okay! I will clear up everything for you!", timeStamp));
@@ -336,8 +364,8 @@ public class MainActivity extends AppCompatActivity {
                     "Trying to make you laugh...",
                     "You might find this funny...",
                     "Enjoy your joke..."
-
             };
+
             displayBotReply(new MessageData(Constants.BOT, replyForJokes[new Random().nextInt(replyForJokes.length)] + "\n" + mainFunction(message), timeStamp));
 
         } else{

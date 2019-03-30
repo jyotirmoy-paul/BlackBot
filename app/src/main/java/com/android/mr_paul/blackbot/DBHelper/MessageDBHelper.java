@@ -23,8 +23,7 @@ public class MessageDBHelper extends SQLiteOpenHelper {
                 MessageEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 MessageEntry.COLUMN_SENDER + " TEXT NOT NULL, " +
                 MessageEntry.COLUMN_MESSAGE + " TEXT NOT NULL, " +
-                MessageEntry.COLUMN_TIMESTAMP + " TEXT NOT NULL," +
-                MessageEntry.COLUMN_SQL_TIMESTAMP + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                MessageEntry.COLUMN_TIMESTAMP + " TEXT NOT NULL" +
                 ");";
 
         db.execSQL(CREATE_DATABASE);

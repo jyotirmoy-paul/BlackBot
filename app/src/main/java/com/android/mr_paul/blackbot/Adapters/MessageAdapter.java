@@ -62,6 +62,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         String sender = cursor.getString(cursor.getColumnIndex(MessageContract.MessageEntry.COLUMN_SENDER));
         String message = cursor.getString(cursor.getColumnIndex(MessageContract.MessageEntry.COLUMN_MESSAGE));
         String timestamp = cursor.getString(cursor.getColumnIndex(MessageContract.MessageEntry.COLUMN_TIMESTAMP));
+        long id = cursor.getLong(cursor.getColumnIndex(MessageContract.MessageEntry._ID));
 
         if(Constants.BOT.equals(sender)){
             messageViewHolder.userLayout.setVisibility(View.GONE);
@@ -72,6 +73,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             messageViewHolder.userLayout.setVisibility(View.VISIBLE);
             messageViewHolder.userMessageView.setText(message);
         }
+
+        messageViewHolder.itemView.setTag(id);
 
     }
 
