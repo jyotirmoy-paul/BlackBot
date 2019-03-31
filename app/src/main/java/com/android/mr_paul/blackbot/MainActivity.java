@@ -20,6 +20,7 @@ import android.os.Message;
 import android.provider.ContactsContract;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.mr_paul.blackbot.Adapters.MessageAdapter;
@@ -77,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
 
     SharedPreferences preferences;
 
+    private BottomSheetBehavior bottomSheetBehavior;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +96,9 @@ public class MainActivity extends AppCompatActivity {
         botWritingView = findViewById(R.id.bot_writing_view);
         final ImageView deleteChatMessages = findViewById(R.id.delete_chats);
         botSpeechToggle = findViewById(R.id.bot_speech_toggle);
+
+        View bottomSheet = findViewById(R.id.bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -147,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
 
         final ProgressDialog pd = new ProgressDialog(MainActivity.this);
         pd.setTitle("Please Wait");
-        pd.setMessage("Starting Paul's Black Bot...");
+        pd.setMessage("Initializing Bot...");
         pd.setCanceledOnTouchOutside(false);
         pd.setCancelable(false);
 
@@ -254,6 +261,37 @@ public class MainActivity extends AppCompatActivity {
                 removeItem((long) viewHolder.itemView.getTag());
             }
         }).attachToRecyclerView(recyclerView);
+
+        // about project show section
+
+        String about = "Paul's Black Bot\n\nAn AIML based chat bot, which wholeheartedly listens to whatever you have to say it. " +
+                "Can place call from your contact, launch any app on your Android Device, " +
+                "or can discuss with you about LIFE, UNIVERSE and EVERYTHING.\n\n" +
+                "This app was my genuine attempt to make a bot like Natasha (Hike), which also uses" +
+                " AIML (Artificial Intelligence Markup Language), which makes uses of wildcards to match certain " +
+                "string patterns and produces responsive replies in the form of the hard-coded template.\n" +
+                "So, nothing impressive!\n\n" +
+                "You can click on this text to view the github repo of this project.\n\n\nJyotirmoy Paul";
+
+        TextView aboutBlackBot = findViewById(R.id.about_black_bot);
+        aboutBlackBot.setText(about);
+
+        TextView description = findViewById(R.id.show_description);
+        description.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            }
+        });
+
+        aboutBlackBot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse("https://github.com/jyotirmoy-paul/BlackBot"));
+                startActivity(intent);
+            }
+        });
 
     }
 
