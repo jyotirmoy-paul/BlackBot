@@ -1,4 +1,4 @@
-package com.android.mr_paul.blackbot.UtilityPackage;
+package com.paul.mr_paul.blackbot.UtilityPackage;
 
 public class Constants {
 

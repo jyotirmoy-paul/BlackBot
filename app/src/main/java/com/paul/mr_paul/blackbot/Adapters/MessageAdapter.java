@@ -1,20 +1,18 @@
-package com.android.mr_paul.blackbot.Adapters;
+package com.paul.mr_paul.blackbot.Adapters;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.mr_paul.blackbot.Contract.MessageContract;
-import com.android.mr_paul.blackbot.R;
-import com.android.mr_paul.blackbot.UtilityPackage.Constants;
+import com.paul.mr_paul.blackbot.Contract.MessageContract;
+import com.paul.mr_paul.blackbot.R;
+import com.paul.mr_paul.blackbot.UtilityPackage.Constants;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 

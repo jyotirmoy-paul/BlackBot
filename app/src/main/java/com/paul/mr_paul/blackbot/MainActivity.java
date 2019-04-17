@@ -1,4 +1,4 @@
-package com.android.mr_paul.blackbot;
+package com.paul.mr_paul.blackbot;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -34,11 +34,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.mr_paul.blackbot.Adapters.MessageAdapter;
-import com.android.mr_paul.blackbot.Contract.MessageContract;
-import com.android.mr_paul.blackbot.DBHelper.MessageDBHelper;
-import com.android.mr_paul.blackbot.DataTypes.MessageData;
-import com.android.mr_paul.blackbot.UtilityPackage.Constants;
+import com.paul.mr_paul.blackbot.Adapters.MessageAdapter;
+import com.paul.mr_paul.blackbot.Contract.MessageContract;
+import com.paul.mr_paul.blackbot.DBHelper.MessageDBHelper;
+import com.paul.mr_paul.blackbot.DataTypes.MessageData;
+import com.paul.mr_paul.blackbot.UtilityPackage.Constants;
 import com.bumptech.glide.Glide;
 
 import org.alicebot.ab.AIMLProcessor;
@@ -524,16 +524,18 @@ public class MainActivity extends AppCompatActivity {
     // method for placing a call
     private void makeCall(String name){
 
-        String number;
-
-        if(name.matches("[0-9]+") && name.length() > 2){
-            // string only contains number
-            number = name;
-        } else{
-            number = getNumber(name,MainActivity.this);
-        }
 
         try {
+            String number;
+
+            if(name.matches("[0-9]+") && name.length() > 2){
+                // string only contains number
+                number = name;
+            } else{
+                number = getNumber(name,MainActivity.this);
+            }
+
+
             Intent callIntent = new Intent(Intent.ACTION_CALL);
             callIntent.setData(Uri.parse("tel:" + number));
             startActivity(callIntent);

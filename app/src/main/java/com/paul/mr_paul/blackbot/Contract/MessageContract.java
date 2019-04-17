@@ -1,4 +1,4 @@
-package com.android.mr_paul.blackbot.Contract;
+package com.paul.mr_paul.blackbot.Contract;
 
 import android.provider.BaseColumns;
 

@@ -1,10 +1,10 @@
-package com.android.mr_paul.blackbot.DBHelper;
+package com.paul.mr_paul.blackbot.DBHelper;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.android.mr_paul.blackbot.Contract.MessageContract.MessageEntry;
+import com.paul.mr_paul.blackbot.Contract.MessageContract.MessageEntry;
 
 public class MessageDBHelper extends SQLiteOpenHelper {
 

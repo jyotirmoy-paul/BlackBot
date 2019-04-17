@@ -1,4 +1,4 @@
-package com.android.mr_paul.blackbot.DataTypes;
+package com.paul.mr_paul.blackbot.DataTypes;
 
 public class MessageData {
 
